@@ -14,6 +14,12 @@ import { translate } from '@/lib/i18n/server';
 import { resolveLocale } from '@/lib/i18n/locale';
 import { withLocalizedDefaultSections } from '@/lib/utils/section-helpers';
 
+export const dynamic = 'force-dynamic';
+
+export async function generateStaticParams() {
+  return [];
+}
+
 type PageProps = {
   params: Promise<{ id: string }>;
   searchParams?: Promise<{
@@ -150,6 +156,7 @@ function parsePageSize(value: string | undefined): PageSize {
   }
   return 'A4';
 }
+
 
 export default async function PrintResumePage({ params, searchParams }: PageProps) {
   const resolvedParams = await params;

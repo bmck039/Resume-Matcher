@@ -4,8 +4,24 @@
  * Single source of truth for API configuration and base fetch utilities.
  */
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// Determine API URL - use environment variable or default to localhost:8000
+// When running in Electron, the backend is always on localhost:8000
+function getApiUrl(): string {
+  // Check if we have the environment variable (set at build time)
+  const envUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (envUrl) {
+    return envUrl;
+  }
+  
+  // Default fallback - Electron and web both use localhost:8000
+  return 'http://localhost:8000';
+}
+
+export const API_URL = getApiUrl();
 export const API_BASE = `${API_URL}/api/v1`;
+
+// Fetch is always available in modern browsers and Next.js
+// No fallback needed
 
 /**
  * Standard fetch wrapper with common error handling.
@@ -13,6 +29,12 @@ export const API_BASE = `${API_URL}/api/v1`;
  */
 export async function apiFetch(endpoint: string, options?: RequestInit): Promise<Response> {
   const url = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint}`;
+  
+  // Log for debugging
+  if (process.env.NODE_ENV === 'development') {
+    console.debug(`[API] ${options?.method || 'GET'} ${url}`);
+  }
+  
   return fetch(url, options);
 }
 

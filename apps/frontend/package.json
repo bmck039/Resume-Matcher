@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
+    "build:electron": "NEXT_BUILD_ELECTRON=true NEXT_PUBLIC_API_URL=http://localhost:8000 next build",
     "start": "next start",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx .",
     "format": "prettier --write .",

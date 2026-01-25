@@ -9,6 +9,12 @@ import { API_BASE } from '@/lib/api/client';
 import { translate } from '@/lib/i18n/server';
 import { resolveLocale } from '@/lib/i18n/locale';
 
+export const dynamic = 'force-dynamic';
+
+export async function generateStaticParams() {
+  return [];
+}
+
 const PAGE_DIMENSIONS = {
   A4: { width: 210, height: 297 },
   LETTER: { width: 215.9, height: 279.4 },
