@@ -498,5 +498,154 @@ Resume-Matcher/
 
 ---
 
+## 构建桌面应用程序
+
+Resume Matcher 可以使用 Electron 打包为独立桌面应用程序。本部分涵盖为 macOS、Windows 和 Linux 构建可分发应用程序。
+
+### 桌面构建先决条件
+
+除了上述基本设置外，还需要：
+- **PyInstaller**: `pip install pyinstaller`（用于捆绑 Python 后端）
+- **electron-builder**: 已包含在 `package.json` 中
+- **特定于平台的工具**（见下文）
+
+### 桌面构建脚本
+
+导航到项目根目录并使用这些命令：
+
+```bash
+# 为当前平台构建
+npm run build:electron-linux   # Linux (AppImage + deb)
+npm run build:electron-mac     # macOS (DMG + ZIP)
+npm run build:electron-windows # Windows (NSIS 安装程序 + 便携版)
+
+# 为所有平台构建（从 Linux）
+npm run build:all-from-linux
+```
+
+构建的应用程序出现在 `dist/` 文件夹中。
+
+### macOS 构建和代码签名
+
+用于生产就绪的 macOS 应用程序（带代码签名和公证）：
+
+```bash
+# 一次性设置（在 macOS 上）
+bash scripts/setup-mac-signing.sh
+
+# 构建、签名并准备公证
+bash scripts/build-mac-signed.sh
+
+# 向 Apple 公证（可选）
+bash scripts/notarize-mac.sh
+```
+
+有关详细的 macOS 说明，请参阅 [docs/macos-build-guide.md](docs/macos-build-guide.md)。
+
+### Linux 构建（AppImage + Deb）
+
+```bash
+npm run build:electron-linux
+```
+
+生成：
+- `Resume Matcher-*.AppImage` - 便携版，适用于大多数 Linux 发行版
+- `resume-matcher*.deb` - Debian 软件包（Ubuntu、Debian 等）
+
+### Windows 构建（NSIS 安装程序 + 便携版）
+
+```bash
+npm run build:electron-windows
+```
+
+生成：
+- `Resume Matcher Setup *.exe` - NSIS 安装程序
+- `Resume Matcher *.exe` - 便携版本
+
+关于 Windows 上的代码签名，请参阅 [CODE_SIGNING_GUIDE.md](CODE_SIGNING_GUIDE.md)。
+
+### 跨平台构建（从 Linux）
+
+从单一 Linux 机器为所有平台构建：
+
+```bash
+# 构建 Linux（原生）、Windows（通过 Wine）和 macOS（仅 ZIP）
+npm run build:all-from-linux
+```
+
+要求：
+- Windows 构建的 Wine: `sudo apt install wine wine32 wine64`
+- Python 3.12+（带 PyInstaller）
+
+### 代码签名和分发
+
+用于生产分发，需要代码签名的应用程序：
+
+| 平台 | 要求 | 成本 | 流程 |
+|------|------|------|------|
+| **macOS** | Apple 开发者账户 + Developer ID 证书 | $99/年 | 使用 `scripts/setup-mac-signing.sh` |
+| **Windows** | Authenticode 证书（DigiCert、Sectigo 等） | $99-300/年 | 在 `electron-builder.json` 中配置 |
+| **Linux** | 可选的 GPG 签名 | 免费 | 手动签名 AppImage/deb |
+
+关于平台特定的签名说明的详细信息，请参阅 [CODE_SIGNING_GUIDE.md](CODE_SIGNING_GUIDE.md)。
+
+---
+
+## 贡献和开发
+
+### 对于开发者
+
+如果想为 Resume Matcher 做出贡献：
+
+1. **在 GitHub 上 Fork 仓库**
+2. **创建功能分支**: `git checkout -b feature/your-feature`
+3. **进行更改**并在本地测试
+4. **运行测试**: `cd apps/backend && uv run pytest`
+5. **检查代码质量**: `npm run lint && npm run format`
+6. **推送到你的 Fork** 并创建 Pull Request
+
+### 开发工作流程
+
+```bash
+# 启动两个服务器，具有自动重新加载
+npm run dev
+
+# 或在单独的终端中
+npm run dev:backend   # 终端 1
+npm run dev:frontend  # 终端 2
+
+# 然后运行 Electron 应用
+npm run electron:dev
+```
+
+### 项目结构
+
+开发者关键文件：
+
+```
+Resume-Matcher/
+├── apps/
+│   ├── backend/app/
+│   │   ├── llm.py           # AI 提供商集成（LiteLLM）
+│   │   ├── routers/         # API 端点
+│   │   ├── services/        # 业务逻辑（解析、改进）
+│   │   ├── schemas/         # Pydantic 模型
+│   │   └── prompts/         # LLM 提示模板
+│   └── frontend/
+│       ├── components/      # React 组件
+│       ├── lib/api/         # API 客户端和 hooks
+│       └── app/             # 页面路由
+│
+├── electron/                # Electron 应用代码
+│   ├── main.js              # 主进程
+│   ├── preload.js           # 沙箱安全层
+│   └── entitlements.mac.plist  # macOS 权限
+│
+├── scripts/                 # 构建和实用脚本
+└── docs/agent/              # 详细的架构文档
+```
+
+---
+
 祝你简历制作顺利！如果 Resume Matcher 对你有帮助，欢迎 [给仓库点个 Star](https://github.com/srbhr/Resume-Matcher)，以及 [加入我们的 Discord](https://dsc.gg/resume-matcher)。
 

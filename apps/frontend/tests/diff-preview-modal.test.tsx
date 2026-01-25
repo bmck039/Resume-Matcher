@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { DiffPreviewModal } from '@/components/tailor/diff-preview-modal';
+import type { ResumeFieldDiff } from '@/components/common/resume_previewer_context';
 
 vi.mock('@/lib/i18n', () => ({
   useTranslations: () => ({
@@ -17,7 +18,7 @@ const diffSummary = {
   high_risk_changes: 1,
 };
 
-const detailedChanges = [
+const detailedChanges: ResumeFieldDiff[] = [
   {
     field_path: 'summary',
     field_type: 'summary',

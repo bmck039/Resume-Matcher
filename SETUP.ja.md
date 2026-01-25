@@ -498,5 +498,154 @@ Resume-Matcher/
 
 ---
 
+## デスクトップアプリケーションの構築
+
+Resume Matcher は Electron を使用してスタンドアロンデスクトップアプリケーションとしてパッケージ化できます。このセクションでは、macOS、Windows、および Linux 用の配布可能なアプリの構築をカバーします。
+
+### デスクトップビルドの前提条件
+
+基本的なセットアップに加えて、以下が必要です：
+- **PyInstaller**: `pip install pyinstaller`（Python バックエンドをバンドルするため）
+- **electron-builder**: 既に `package.json` に含まれています
+- **プラットフォーム固有のツール**（下記参照）
+
+### デスクトップビルドスクリプト
+
+プロジェクトルートに移動して、これらのコマンドを使用します：
+
+```bash
+# 現在のプラットフォーム用にビルド
+npm run build:electron-linux   # Linux (AppImage + deb)
+npm run build:electron-mac     # macOS (DMG + ZIP)
+npm run build:electron-windows # Windows (NSIS インストーラー + ポータブル)
+
+# すべてのプラットフォーム用にビルド（Linux から）
+npm run build:all-from-linux
+```
+
+ビルドされたアプリケーションは `dist/` フォルダーに表示されます。
+
+### macOS ビルドとコード署名
+
+本番環境対応の macOS アプリ（コード署名と notarization 付き）：
+
+```bash
+# 1 回限りのセットアップ（macOS 上）
+bash scripts/setup-mac-signing.sh
+
+# ビルド、署名、notarization 用に準備
+bash scripts/build-mac-signed.sh
+
+# Apple で notarize（オプション）
+bash scripts/notarize-mac.sh
+```
+
+詳細な macOS 手順については、[docs/macos-build-guide.md](docs/macos-build-guide.md) を参照してください。
+
+### Linux ビルド（AppImage + Deb）
+
+```bash
+npm run build:electron-linux
+```
+
+生成物：
+- `Resume Matcher-*.AppImage` - ポータブル、ほとんどの Linux ディストリビューションで動作
+- `resume-matcher*.deb` - Debian パッケージ（Ubuntu、Debian など）
+
+### Windows ビルド（NSIS インストーラー + ポータブル）
+
+```bash
+npm run build:electron-windows
+```
+
+生成物：
+- `Resume Matcher Setup *.exe` - NSIS インストーラー
+- `Resume Matcher *.exe` - ポータブル版
+
+Windows でのコード署名については、[CODE_SIGNING_GUIDE.md](CODE_SIGNING_GUIDE.md) を参照してください。
+
+### クロスプラットフォームビルド（Linux から）
+
+単一の Linux マシンからすべてのプラットフォーム用にビルド：
+
+```bash
+# Linux（ネイティブ）、Windows（Wine 経由）、macOS（ZIP のみ）をビルド
+npm run build:all-from-linux
+```
+
+要件：
+- Windows ビルド用 Wine: `sudo apt install wine wine32 wine64`
+- Python 3.12+（PyInstaller 付き）
+
+### コード署名と配布
+
+本番環境配布の場合、コード署名されたアプリケーションが必要です：
+
+| プラットフォーム | 要件 | コスト | プロセス |
+|-----------|------|-------|---------|
+| **macOS** | Apple Developer アカウント + Developer ID 証明書 | $99/年 | `scripts/setup-mac-signing.sh` を使用 |
+| **Windows** | Authenticode 証明書（DigiCert、Sectigo など） | $99-300/年 | `electron-builder.json` で設定 |
+| **Linux** | オプションの GPG 署名 | 無料 | AppImage/deb を手動で署名 |
+
+プラットフォーム固有の署名手順の詳細については、[CODE_SIGNING_GUIDE.md](CODE_SIGNING_GUIDE.md) を参照してください。
+
+---
+
+## 貢献と開発
+
+### 開発者向け
+
+Resume Matcher に貢献したい場合：
+
+1. **GitHub でリポジトリをフォーク**する
+2. **機能ブランチを作成**: `git checkout -b feature/your-feature`
+3. **変更を加える**ローカルでテスト
+4. **テストを実行**: `cd apps/backend && uv run pytest`
+5. **コード品質を確認**: `npm run lint && npm run format`
+6. **フォークにプッシュ**してプルリクエストを作成
+
+### 開発ワークフロー
+
+```bash
+# 自動リロードを使用して両方のサーバーを起動
+npm run dev
+
+# または別々のターミナルで
+npm run dev:backend   # ターミナル 1
+npm run dev:frontend  # ターミナル 2
+
+# 次に Electron アプリを実行
+npm run electron:dev
+```
+
+### プロジェクト構造
+
+開発者向け主要ファイル：
+
+```
+Resume-Matcher/
+├── apps/
+│   ├── backend/app/
+│   │   ├── llm.py           # AI プロバイダー統合（LiteLLM）
+│   │   ├── routers/         # API エンドポイント
+│   │   ├── services/        # ビジネスロジック（解析、改善）
+│   │   ├── schemas/         # Pydantic モデル
+│   │   └── prompts/         # LLM プロンプトテンプレート
+│   └── frontend/
+│       ├── components/      # React コンポーネント
+│       ├── lib/api/         # API クライアントとフック
+│       └── app/             # ページルート
+│
+├── electron/                # Electron アプリコード
+│   ├── main.js              # メインプロセス
+│   ├── preload.js           # サンドボックスセキュリティレイヤー
+│   └── entitlements.mac.plist  # macOS 権限
+│
+├── scripts/                 # ビルドとユーティリティスクリプト
+└── docs/agent/              # 詳細アーキテクチャドキュメンテーション
+```
+
+---
+
 楽しい履歴書づくりを！Resume Matcher が役立ったら、[リポジトリに Star](https://github.com/srbhr/Resume-Matcher) と [Discord 参加](https://dsc.gg/resume-matcher) をぜひ。
 

@@ -165,7 +165,7 @@ Follow these steps to set up the environment and run the application.
 
 The full stack Next.js (React and FastAPI) web application allows users to interact with the Resume Matcher tool interactively via a web browser.
 
-To run the full stack web application (frontend client and backend api servers), follow the instructions over on the [webapp README](/webapp/README.md) file.
+To run the full stack web application (frontend client and backend API servers), follow the instructions in the [Setup Guide](../SETUP.md).
 
 ## Code Formatting
 

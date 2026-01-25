@@ -1,0 +1,104 @@
+{
+  "appId": "com.resumematcher.app",
+  "productName": "Resume Matcher",
+  "directories": {
+    "buildResources": "assets",
+    "output": "dist"
+  },
+  "files": [
+    "electron/**/*",
+    "apps/frontend/out/**/*",
+    "node_modules/**/*"
+  ],
+  "extraResources": [
+    {
+      "from": "dist-backend",
+      "to": "backend-bin",
+      "filter": ["**/*"]
+    },
+    {
+      "from": "apps/backend",
+      "to": "backend",
+      "filter": [
+        "!.git",
+        "!.pytest_cache",
+        "!__pycache__",
+        "!*.pyc",
+        "!venv",
+        "!.venv",
+        "!.env",
+        "!tests"
+      ]
+    },
+    {
+      "from": "assets",
+      "to": "assets"
+    }
+  ],
+  "afterPack": "./scripts/after-pack.js",
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      },
+      {
+        "target": "portable",
+        "arch": ["x64"]
+      }
+    ],
+    "certificateFile": null,
+    "certificatePassword": null,
+    "sign": null
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "Resume Matcher"
+  },
+  "mac": {
+    "target": [
+      "dmg",
+      "zip"
+    ],
+    "category": "public.app-category.productivity",
+    "hardenedRuntime": true,
+    "gatekeeperAssess": false,
+    "entitlements": "electron/entitlements.mac.plist",
+    "entitlementsInherit": "electron/entitlements.mac.plist",
+    "identity": null,
+    "certificateFile": null,
+    "certificatePassword": null,
+    "signingHashAlgorithms": ["sha256"]
+  },
+  "dmg": {
+    "contents": [
+      {
+        "x": 130,
+        "y": 220
+      },
+      {
+        "x": 410,
+        "y": 220,
+        "type": "link",
+        "path": "/Applications"
+      }
+    ]
+  },
+  "linux": {
+    "target": [
+      "AppImage",
+      "deb"
+    ],
+    "category": "Office",
+    "icon": "assets/icon.png"
+  },
+  "deb": {
+    "depends": []
+  },
+  "appImage": {
+    "artifactName": "${productName}-${version}-${arch}.${ext}"
+  }
+}

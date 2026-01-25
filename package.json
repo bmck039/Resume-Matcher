@@ -1,0 +1,53 @@
+{
+  "name": "resume-matcher-desktop",
+  "version": "1.0.0",
+  "description": "AI-powered resume tailoring for job descriptions - Desktop App",
+  "main": "electron/main.js",
+  "homepage": "./",
+  "author": {
+    "name": "Ben McKallip",
+    "email": "bmckallip@me.com"
+  },
+  "private": true,
+  "scripts": {
+    "install": "npm install --prefix apps/frontend && pip3 install -r apps/backend/requirements.txt",
+    "postinstall": "npm install sharp --no-save",
+    "dev": "npm run dev:backend & npm run dev:frontend",
+    "dev:backend": "cd apps/backend && python3 -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000",
+    "dev:frontend": "NEXT_PUBLIC_API_URL=http://localhost:8000 npm run dev --prefix apps/frontend",
+    "dev:electron": "npm run build:frontend && NODE_ENV=development NEXT_PUBLIC_API_URL=http://localhost:8000 npx electron .",
+    "generate:icons": "node scripts/generate-icons.js",
+    "create:ico": "node scripts/create-ico.js",
+    "create:icns": "node scripts/create-icns.js",
+    "build:frontend": "NEXT_BUILD_ELECTRON=true NEXT_PUBLIC_API_URL=http://localhost:8000 npm run build:electron --prefix apps/frontend",
+    "build:backend": "node scripts/build-backend.js",
+    "prebuild": "node scripts/prebuild-electron.js",
+    "build": "npm run prebuild && npm run build:electron-app",
+    "build:electron-app": "electron-builder --config electron-builder.json",
+    "build:electron-all": "npm run prebuild && electron-builder --config electron-builder.json -mwl",
+    "build:electron-windows": "npm run prebuild && electron-builder --config electron-builder.json --win",
+    "build:electron-mac": "npm run prebuild && electron-builder --config electron-builder.json --mac",
+    "build:electron-linux": "npm run prebuild && electron-builder --config electron-builder.json --linux",
+    "build:electron-portable": "npm run prebuild && electron-builder --config electron-builder.json --win --dir",
+    "build:all-from-linux": "npm run build:electron-linux && bash scripts/build-windows-cross.sh && bash scripts/build-mac.sh",
+    "build:mac-signed": "bash scripts/build-mac-signed.sh",
+    "setup:mac-signing": "bash scripts/setup-mac-signing.sh",
+    "notarize:mac": "bash scripts/notarize-mac.sh",
+    "electron": "npx electron .",
+    "electron:dev": "NODE_ENV=development NEXT_PUBLIC_API_URL=http://localhost:8000 npx electron .",
+    "lint": "npm run lint --prefix apps/frontend",
+    "format": "npm run format --prefix apps/frontend",
+    "test": "npm run test --prefix apps/frontend && cd apps/backend && python3 -m pytest tests/"
+  },
+  "dependencies": {
+    "electron-is-dev": "^2.0.0"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "extends": "./electron-builder.json"
+  }
+}

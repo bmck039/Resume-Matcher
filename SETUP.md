@@ -485,4 +485,153 @@ Stuck? Here are your options:
 
 ---
 
+## Building a Desktop Application
+
+Resume Matcher can be packaged as a standalone desktop application using Electron. This section covers building distributable apps for macOS, Windows, and Linux.
+
+### Prerequisites for Desktop Build
+
+In addition to the basic setup above, you'll need:
+- **PyInstaller**: `pip install pyinstaller` (for bundling Python backend)
+- **electron-builder**: Already in `package.json`
+- **Platform-specific tools** (see below)
+
+### Desktop Build Scripts
+
+Navigate to the project root and use these commands:
+
+```bash
+# Build for your current platform
+npm run build:electron-linux   # Linux (AppImage + deb)
+npm run build:electron-mac     # macOS (DMG + ZIP)
+npm run build:electron-windows # Windows (NSIS installer + portable)
+
+# Build for all platforms (from Linux)
+npm run build:all-from-linux
+```
+
+Built applications appear in the `dist/` folder.
+
+### macOS Build & Code Signing
+
+For a production-ready macOS app with code signing and notarization:
+
+```bash
+# One-time setup (on macOS)
+bash scripts/setup-mac-signing.sh
+
+# Build, sign, and prepare for notarization
+bash scripts/build-mac-signed.sh
+
+# Notarize with Apple (optional)
+bash scripts/notarize-mac.sh
+```
+
+See [docs/macos-build-guide.md](docs/macos-build-guide.md) for detailed macOS instructions.
+
+### Linux Build (AppImage + Deb)
+
+```bash
+npm run build:electron-linux
+```
+
+Produces:
+- `Resume Matcher-*.AppImage` - Portable, works on most Linux distributions
+- `resume-matcher*.deb` - Debian package (Ubuntu, Debian, etc.)
+
+### Windows Build (NSIS Installer + Portable)
+
+```bash
+npm run build:electron-windows
+```
+
+Produces:
+- `Resume Matcher Setup *.exe` - NSIS installer
+- `Resume Matcher *.exe` - Portable version
+
+For code signing on Windows, see [CODE_SIGNING_GUIDE.md](CODE_SIGNING_GUIDE.md).
+
+### Cross-Platform Building from Linux
+
+Building for all platforms from a single Linux machine:
+
+```bash
+# Builds Linux (native), Windows (via Wine), and macOS (ZIP only)
+npm run build:all-from-linux
+```
+
+Requirements:
+- Wine for Windows builds: `sudo apt install wine wine32 wine64`
+- Python 3.12+ with PyInstaller
+
+### Code Signing & Distribution
+
+For production distribution, you'll want code-signed applications:
+
+| Platform | Requirements | Cost | Process |
+|----------|--------------|------|---------|
+| **macOS** | Apple Developer account + Developer ID Certificate | $99/year | Use `scripts/setup-mac-signing.sh` |
+| **Windows** | Authenticode certificate (DigiCert, Sectigo, etc.) | $99-300/year | Configure in `electron-builder.json` |
+| **Linux** | Optional GPG signing | Free | Sign AppImage/deb manually |
+
+See [CODE_SIGNING_GUIDE.md](CODE_SIGNING_GUIDE.md) for detailed platform-specific signing instructions.
+
+---
+
+## Contributing & Development
+
+### For Developers
+
+If you want to contribute to Resume Matcher:
+
+1. **Fork the repository** on GitHub
+2. **Create a feature branch**: `git checkout -b feature/your-feature`
+3. **Make your changes** and test locally
+4. **Run tests**: `cd apps/backend && uv run pytest`
+5. **Check code quality**: `npm run lint && npm run format`
+6. **Push to your fork** and create a Pull Request
+
+### Development Workflow
+
+```bash
+# Start both servers with auto-reload
+npm run dev
+
+# Or in separate terminals
+npm run dev:backend   # Terminal 1
+npm run dev:frontend  # Terminal 2
+
+# Then run Electron app
+npm run electron:dev
+```
+
+### Project Structure
+
+Key files for developers:
+
+```
+Resume-Matcher/
+├── apps/
+│   ├── backend/app/
+│   │   ├── llm.py           # AI provider integration (LiteLLM)
+│   │   ├── routers/         # API endpoints
+│   │   ├── services/        # Business logic (parsing, improvement)
+│   │   ├── schemas/         # Pydantic models
+│   │   └── prompts/         # LLM prompt templates
+│   └── frontend/
+│       ├── components/      # React components
+│       ├── lib/api/         # API client and hooks
+│       └── app/             # Page routes
+│
+├── electron/                # Electron app code
+│   ├── main.js              # Main process
+│   ├── preload.js           # Sandbox security layer
+│   └── entitlements.mac.plist  # macOS permissions
+│
+├── scripts/                 # Build and utility scripts
+└── docs/agent/              # Detailed architecture docs
+```
+
+---
+
 Happy resume building! If you find Resume Matcher helpful, consider [starring the repo](https://github.com/srbhr/Resume-Matcher) and [joining our Discord](https://dsc.gg/resume-matcher).

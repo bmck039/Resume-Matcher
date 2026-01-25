@@ -8,6 +8,8 @@
 
 **English** | [Español](README.es.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md)
 
+Setup Guide: [SETUP.md](SETUP.md) • [Español](SETUP.es.md) • [简体中文](SETUP.zh-CN.md) • [日本語](SETUP.ja.md)
+
 Create tailored resumes for each job application with AI-powered suggestions. Works locally with Ollama or connect to your favorite LLM provider via API.
 
 ![Resume Matcher Demo](assets/Resume_Matcher_Demo_2.gif)

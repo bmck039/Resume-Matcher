@@ -498,5 +498,154 @@ Resume-Matcher/
 
 ---
 
+## Construir una Aplicación de Escritorio
+
+Resume Matcher se puede empaquetar como una aplicación de escritorio independiente usando Electron. Esta sección cubre la construcción de aplicaciones distribuibles para macOS, Windows y Linux.
+
+### Requisitos Previos para la Construcción de Escritorio
+
+Además de la configuración básica anterior, necesitarás:
+- **PyInstaller**: `pip install pyinstaller` (para empaquetar el backend de Python)
+- **electron-builder**: Ya incluido en `package.json`
+- **Herramientas específicas de la plataforma** (ver abajo)
+
+### Scripts de Construcción de Escritorio
+
+Navega a la raíz del proyecto y usa estos comandos:
+
+```bash
+# Construir para tu plataforma actual
+npm run build:electron-linux   # Linux (AppImage + deb)
+npm run build:electron-mac     # macOS (DMG + ZIP)
+npm run build:electron-windows # Windows (instalador NSIS + portable)
+
+# Construir para todas las plataformas (desde Linux)
+npm run build:all-from-linux
+```
+
+Las aplicaciones construidas aparecen en la carpeta `dist/`.
+
+### Construcción y Firma de Código en macOS
+
+Para una aplicación macOS lista para producción con firma de código y notarización:
+
+```bash
+# Configuración de una sola vez (en macOS)
+bash scripts/setup-mac-signing.sh
+
+# Construir, firmar y preparar para notarización
+bash scripts/build-mac-signed.sh
+
+# Notarizar con Apple (opcional)
+bash scripts/notarize-mac.sh
+```
+
+Ver [docs/macos-build-guide.md](docs/macos-build-guide.md) para instrucciones detalladas de macOS.
+
+### Construcción de Linux (AppImage + Deb)
+
+```bash
+npm run build:electron-linux
+```
+
+Produce:
+- `Resume Matcher-*.AppImage` - Portable, funciona en la mayoría de distribuciones Linux
+- `resume-matcher*.deb` - Paquete Debian (Ubuntu, Debian, etc.)
+
+### Construcción de Windows (Instalador NSIS + Portable)
+
+```bash
+npm run build:electron-windows
+```
+
+Produce:
+- `Resume Matcher Setup *.exe` - Instalador NSIS
+- `Resume Matcher *.exe` - Versión portable
+
+Para la firma de código en Windows, ver [CODE_SIGNING_GUIDE.md](CODE_SIGNING_GUIDE.md).
+
+### Construcción Multiplataforma desde Linux
+
+Construir para todas las plataformas desde una sola máquina Linux:
+
+```bash
+# Construye Linux (nativo), Windows (vía Wine) y macOS (ZIP solamente)
+npm run build:all-from-linux
+```
+
+Requisitos:
+- Wine para construcciones de Windows: `sudo apt install wine wine32 wine64`
+- Python 3.12+ con PyInstaller
+
+### Firma de Código y Distribución
+
+Para la distribución en producción, querrás aplicaciones con firma de código:
+
+| Plataforma | Requisitos | Costo | Proceso |
+|-----------|-----------|-------|---------|
+| **macOS** | Cuenta de Apple Developer + Developer ID Certificate | $99/año | Usar `scripts/setup-mac-signing.sh` |
+| **Windows** | Certificado Authenticode (DigiCert, Sectigo, etc.) | $99-300/año | Configurar en `electron-builder.json` |
+| **Linux** | Firma GPG opcional | Gratis | Firmar AppImage/deb manualmente |
+
+Ver [CODE_SIGNING_GUIDE.md](CODE_SIGNING_GUIDE.md) para instrucciones detalladas de firma específicas de la plataforma.
+
+---
+
+## Contribuir y Desarrollo
+
+### Para Desarrolladores
+
+Si quieres contribuir a Resume Matcher:
+
+1. **Haz fork del repositorio** en GitHub
+2. **Crea una rama de función**: `git checkout -b feature/tu-función`
+3. **Realiza tus cambios** y prueba localmente
+4. **Ejecuta pruebas**: `cd apps/backend && uv run pytest`
+5. **Comprueba la calidad del código**: `npm run lint && npm run format`
+6. **Sube a tu fork** y crea un Pull Request
+
+### Flujo de Trabajo de Desarrollo
+
+```bash
+# Inicia ambos servidores con recarga automática
+npm run dev
+
+# O en terminales separadas
+npm run dev:backend   # Terminal 1
+npm run dev:frontend  # Terminal 2
+
+# Luego ejecuta la aplicación Electron
+npm run electron:dev
+```
+
+### Estructura del Proyecto
+
+Archivos clave para desarrolladores:
+
+```
+Resume-Matcher/
+├── apps/
+│   ├── backend/app/
+│   │   ├── llm.py           # Integración de proveedores de IA (LiteLLM)
+│   │   ├── routers/         # Endpoints de API
+│   │   ├── services/        # Lógica de negocio (análisis, mejora)
+│   │   ├── schemas/         # Modelos Pydantic
+│   │   └── prompts/         # Plantillas de prompts LLM
+│   └── frontend/
+│       ├── components/      # Componentes React
+│       ├── lib/api/         # Cliente de API y hooks
+│       └── app/             # Rutas de página
+│
+├── electron/                # Código de aplicación Electron
+│   ├── main.js              # Proceso principal
+│   ├── preload.js           # Capa de seguridad sandbox
+│   └── entitlements.mac.plist  # Permisos macOS
+│
+├── scripts/                 # Scripts de construcción y utilidad
+└── docs/agent/              # Documentación arquitectónica detallada
+```
+
+---
+
 ¡Feliz creación de currículums! Si Resume Matcher te resulta útil, considera [darle una estrella al repo](https://github.com/srbhr/Resume-Matcher) y [unirte a nuestro Discord](https://dsc.gg/resume-matcher).
 
