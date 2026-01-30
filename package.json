@@ -10,7 +10,7 @@
   },
   "private": true,
   "scripts": {
-    "install": "npm install --prefix apps/frontend && pip3 install -r apps/backend/requirements.txt",
+    "install": "npm install --prefix apps/frontend && cat requirements.txt | xargs -n 1 pip install",
     "postinstall": "npm install sharp --no-save",
     "dev": "npm run dev:backend & npm run dev:frontend",
     "dev:backend": "cd apps/backend && python3 -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000",
