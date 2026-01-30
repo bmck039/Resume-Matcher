@@ -112,25 +112,8 @@ if [ ! -f "assets/icon.png" ]; then
   echo ""
 fi
 
-# Create .icns if needed
-if [ ! -f "assets/icons/icon.icns" ]; then
-  echo "🎨 Creating macOS .icns icon..."
-  npm run create:icns || echo "⚠️  .icns creation skipped, will use PNG fallback"
-  echo ""
-fi
-
-# Build backend for macOS
-echo "🔨 Building macOS backend executable..."
-node scripts/build-backend.js || echo "⚠️  Backend build skipped"
-echo ""
-
-# Build frontend
-echo "📦 Building frontend..."
-npm run build:frontend
-echo ""
-
-# Build Electron app with signing
-echo "📦 Building Electron app..."
+# Build Electron app with signing (prebuild handles frontend + backend + node bundling)
+echo "📦 Building application (frontend + backend + bundling)..."
 
 if [ "$unsigned" = true ]; then
   echo "   Building unsigned (no Developer ID certificate)"

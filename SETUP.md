@@ -76,7 +76,10 @@ npm install                  # Install Node.js dependencies
 npm run dev                  # Start the dev server
 ```
 
+
 Open your browser to **<http://localhost:3000>** and you're ready to go!
+
+> **For Apple Silicon:** You'll need to install onxruntime before other requirements with `onnxruntime>=1.20.0`
 
 > **Note:** You'll need to configure an AI provider before using the app. See [Configuring Your AI Provider](#configuring-your-ai-provider) below.
 

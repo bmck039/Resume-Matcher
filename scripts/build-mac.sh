@@ -1,6 +1,6 @@
 #!/bin/bash
 # Updated build script for Resume Matcher Electron app on macOS
-# Supports cross-platform building from Linux
+# Now includes backend bundling and icon generation (matches Linux workflow)
 
 set -e
 
@@ -19,16 +19,6 @@ command -v python3 >/dev/null 2>&1 || { echo "❌ Python 3 is required"; exit 1;
 
 echo "✓ Node.js and npm found"
 echo "✓ Python found"
-
-# Check if running on macOS or Linux
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  echo "✓ Running on macOS"
-  CROSS_BUILD=false
-else
-  echo "⚠️  Cross-compiling for macOS from Linux"
-  echo "   Note: DMG creation may have limitations"
-  CROSS_BUILD=true
-fi
 echo ""
 
 # Generate icons if they don't exist
@@ -38,34 +28,8 @@ if [ ! -f "assets/icon.png" ]; then
   echo ""
 fi
 
-# Create .icns if on macOS and not exists
-if [ "$CROSS_BUILD" = false ] && [ ! -f "assets/icons/icon.icns" ]; then
-  echo "🎨 Creating macOS .icns icon..."
-  node scripts/create-icns.js || echo "⚠️  .icns creation skipped, will use PNG fallback"
-  echo ""
-fi
-
-if [ "$CROSS_BUILD" = true ]; then
-  echo "ℹ️  Building without .icns (using PNG fallback)"
-  echo ""
-fi
-
-# Build backend for macOS if on macOS, or skip if cross-building
-if [ "$CROSS_BUILD" = false ]; then
-  echo "🔨 Building macOS backend..."
-  node scripts/build-backend-mac.js || echo "⚠️  Backend build skipped"
-  echo ""
-else
-  echo "⚠️  Skipping backend build (cross-platform limitation)"
-  echo "   The app will bundle Python source code instead"
-  echo ""
-fi
-
-# Build everything (frontend + electron app)
-echo "📦 Building frontend..."
-npm run build:frontend
-
-echo "📦 Building Electron app..."
+# Build everything (frontend + backend)
+echo "📦 Building application..."
 npm run build:electron-mac
 
 echo ""
