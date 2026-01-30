@@ -132,9 +132,15 @@ class Settings(BaseSettings):
     frontend_base_url: str = "http://localhost:3000"
 
     # CORS Configuration
+    # Electron uses credentials; avoid wildcard origins with credentials enabled.
+    # Include explicit dev and packaged origins.
     cors_origins: list[str] = [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
+        "http://localhost:3000",  # Next.js dev server (web & Electron)
+        "http://127.0.0.1:3000",  # IPv4 loopback (Electron)
+        "http://localhost:8000",  # API server itself
+        "http://127.0.0.1:8000",  # IPv4 loopback for API
+        "file://",                # File protocol (Electron bundled)
+        "null",                   # Electron file:// origin reports as null
     ]
 
     # Paths

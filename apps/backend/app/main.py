@@ -76,11 +76,39 @@ async def root():
 
 
 if __name__ == "__main__":
+    import os
     import uvicorn
 
-    uvicorn.run(
-        "app.main:app",
-        host=settings.host,
-        port=settings.port,
-        reload=True,
+    # Detect if running in PyInstaller bundle
+    is_frozen = getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS')
+    
+    # Configure logging
+    logging.basicConfig(
+        level=logging.INFO if is_frozen else logging.DEBUG,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[logging.StreamHandler(sys.stderr)]
     )
+    
+    if is_frozen:
+        logger.info(f"Running as PyInstaller bundle")
+        logger.info(f"Listening on {settings.host}:{settings.port}")
+    
+    try:
+        uvicorn.run(
+            "app.main:app" if not is_frozen else app,
+            host=settings.host,
+            port=settings.port,
+            reload=not is_frozen,  # Only reload in development
+            log_level="info",
+        )
+    except OSError as e:
+        # Address already in use - uvicorn tried to bind twice
+        if e.errno == 98 or e.errno == 10048:
+            logger.info(f"Port {settings.port} already in use (errno {e.errno}), exiting gracefully")
+            sys.exit(0)
+        else:
+            logger.error(f"Failed to start uvicorn: {e}", exc_info=True)
+            sys.exit(1)
+    except Exception as e:
+        logger.error(f"Failed to start uvicorn: {e}", exc_info=True)
+        sys.exit(1)

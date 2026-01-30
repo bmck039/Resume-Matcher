@@ -8,13 +8,11 @@ const nextConfig: NextConfig = {
   experimental: {
     turbopackUseSystemTlsCerts: true,
   },
-  // For Electron, use standalone mode which allows dynamic routes
-  // and works with file:// protocol serving
+  // For Electron, use standalone server build
   ...(isElectron && {
     output: 'standalone',
-    distDir: '.next',
   }),
-  // Only use rewrites in development mode (not available in static export)
+  // Only use rewrites in development mode
   ...(isElectron
     ? {}
     : {

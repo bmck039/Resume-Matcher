@@ -18,9 +18,13 @@ command -v npm >/dev/null 2>&1 || { echo "❌ npm is required"; exit 1; }
 echo "✓ Node.js and npm found"
 echo ""
 
-# Start backend (if not using system Python)
-echo "🐍 Backend will start automatically with Electron..."
-echo ""
+# Start backend
+echo "🐍 Starting backend on http://localhost:8000..."
+npm run dev:backend &
+BACKEND_PID=$!
+
+# Wait for backend to start
+sleep 3
 
 # Start frontend dev server
 echo "📦 Starting frontend dev server on http://localhost:3000..."
@@ -42,6 +46,7 @@ ELECTRON_PID=$!
 cleanup() {
   echo ""
   echo "🛑 Stopping development servers..."
+  kill $BACKEND_PID 2>/dev/null || true
   kill $FRONTEND_PID 2>/dev/null || true
   kill $ELECTRON_PID 2>/dev/null || true
   exit 0

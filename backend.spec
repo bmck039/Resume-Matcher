@@ -10,22 +10,43 @@ To build:
 import os
 import sys
 from pathlib import Path
+import site
 
 # Get the project root - use SPECPATH which is always available
 project_root = Path(SPECPATH) / 'apps' / 'backend'
 
+# Find litellm package location
+litellm_path = None
+for site_pkg in site.getsitepackages() + [site.getusersitepackages()]:
+    potential_path = Path(site_pkg) / 'litellm'
+    if potential_path.exists():
+        litellm_path = potential_path
+        break
+
 block_cipher = None
+
+# Prepare datas list
+datas = [
+    (str(project_root / 'app' / 'prompts'), 'app/prompts'),
+    (str(project_root / 'app' / 'routers'), 'app/routers'),
+    (str(project_root / 'app' / 'services'), 'app/services'),
+    (str(project_root / 'app' / 'schemas'), 'app/schemas'),
+]
+
+# Add litellm resources if found
+if litellm_path and litellm_path.exists():
+    # Include litellm model cost data and config files
+    litellm_json_files = list(litellm_path.glob('**/*.json'))
+    for json_file in litellm_json_files:
+        rel_path = json_file.relative_to(litellm_path.parent)
+        datas.append((str(json_file), str(rel_path.parent)))
+    print(f"Added {len(litellm_json_files)} litellm resource files")
 
 a = Analysis(
     [str(project_root / 'app' / 'main.py')],
     pathex=[str(project_root)],
     binaries=[],
-    datas=[
-        (str(project_root / 'app' / 'prompts'), 'app/prompts'),
-        (str(project_root / 'app' / 'routers'), 'app/routers'),
-        (str(project_root / 'app' / 'services'), 'app/services'),
-        (str(project_root / 'app' / 'schemas'), 'app/schemas'),
-    ],
+    datas=datas,
     hiddenimports=[
         'fastapi',
         'fastapi.routing',
@@ -48,6 +69,14 @@ a = Analysis(
         'tinydb.storages',
         'litellm',
         'litellm.llms',
+        'litellm.utils',
+        'litellm.main',
+        'litellm._logging',
+        'litellm.integrations',
+        'importlib.resources',
+        'importlib.metadata',
+        'importlib_resources',
+        'importlib_metadata',
         'markitdown',
         'pdfminer',
         'pdfminer.six',
@@ -81,7 +110,7 @@ exe = EXE(
     a.datas,
     [],
     name='backend',
-    debug=False,
+    debug=False,  # Disable debug output for production
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,

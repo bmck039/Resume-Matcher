@@ -21,6 +21,7 @@
     "create:icns": "node scripts/create-icns.js",
     "build:frontend": "NEXT_BUILD_ELECTRON=true NEXT_PUBLIC_API_URL=http://localhost:8000 npm run build:electron --prefix apps/frontend",
     "build:backend": "node scripts/build-backend.js",
+    "bundle:node": "node scripts/bundle-node.js",
     "prebuild": "node scripts/prebuild-electron.js",
     "build": "npm run prebuild && npm run build:electron-app",
     "build:electron-app": "electron-builder --config electron-builder.json",

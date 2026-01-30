@@ -4,8 +4,8 @@
  * Single source of truth for API configuration and base fetch utilities.
  */
 
-// Determine API URL - use environment variable or default to localhost:8000
-// When running in Electron, the backend is always on localhost:8000
+// Determine API URL - use environment variable or default to 127.0.0.1:8000
+// When running in Electron, prefer IPv4 loopback to avoid ::1 resolution issues
 function getApiUrl(): string {
   // Check if we have the environment variable (set at build time)
   const envUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -13,8 +13,8 @@ function getApiUrl(): string {
     return envUrl;
   }
   
-  // Default fallback - Electron and web both use localhost:8000
-  return 'http://localhost:8000';
+  // Default fallback - Electron and web both use 127.0.0.1:8000
+  return 'http://127.0.0.1:8000';
 }
 
 export const API_URL = getApiUrl();

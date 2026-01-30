@@ -5,16 +5,40 @@
     "buildResources": "assets",
     "output": "dist"
   },
+  "asar": true,
+  "asarUnpack": [
+    "apps/frontend/**/*",
+    "apps/backend/**/*"
+  ],
   "files": [
     "electron/**/*",
-    "apps/frontend/out/**/*",
     "node_modules/**/*"
   ],
   "extraResources": [
     {
+      "from": "apps/frontend/.next/standalone",
+      "to": "app.asar.unpacked/apps/frontend/.next/standalone",
+      "filter": ["**/*"]
+    },
+    {
+      "from": "apps/frontend/.next/static",
+      "to": "app.asar.unpacked/apps/frontend/.next/static",
+      "filter": ["**/*"]
+    },
+    {
+      "from": "apps/frontend/public",
+      "to": "app.asar.unpacked/apps/frontend/public",
+      "filter": ["**/*"]
+    },
+    {
+      "from": "dist-backend/node-bin/node",
+      "to": "node",
+      "filter": ["**/*"]
+    },
+    {
       "from": "dist-backend",
       "to": "backend-bin",
-      "filter": ["**/*"]
+      "filter": ["**/*", "!node-bin/**/*"]
     },
     {
       "from": "apps/backend",
@@ -46,10 +70,7 @@
         "target": "portable",
         "arch": ["x64"]
       }
-    ],
-    "certificateFile": null,
-    "certificatePassword": null,
-    "sign": null
+    ]
   },
   "nsis": {
     "oneClick": false,
@@ -68,10 +89,7 @@
     "gatekeeperAssess": false,
     "entitlements": "electron/entitlements.mac.plist",
     "entitlementsInherit": "electron/entitlements.mac.plist",
-    "identity": null,
-    "certificateFile": null,
-    "certificatePassword": null,
-    "signingHashAlgorithms": ["sha256"]
+    "identity": null
   },
   "dmg": {
     "contents": [
@@ -93,7 +111,8 @@
       "deb"
     ],
     "category": "Office",
-    "icon": "assets/icon.png"
+    "icon": "assets/icon.png",
+    "maintainer": "Ben McKallip <bmckallip@me.com>"
   },
   "deb": {
     "depends": []
