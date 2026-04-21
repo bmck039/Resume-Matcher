@@ -21,6 +21,29 @@ echo "✓ Node.js and npm found"
 echo "✓ Python found"
 echo ""
 
+# Validate cached Electron archive. Corrupt cache can cause missing executable
+# in dist/linux-unpacked and trigger ENOENT rename failures.
+if command -v unzip >/dev/null 2>&1; then
+  ELECTRON_VERSION="$(node -p "require('./node_modules/electron/package.json').version" 2>/dev/null || true)"
+  if [ -n "$ELECTRON_VERSION" ]; then
+    ELECTRON_CACHE_ZIP="$HOME/.cache/electron/electron-v${ELECTRON_VERSION}-linux-x64.zip"
+    if [ -f "$ELECTRON_CACHE_ZIP" ]; then
+      echo "📦 Validating cached Electron archive..."
+      if unzip -tqq "$ELECTRON_CACHE_ZIP" >/dev/null 2>&1; then
+        echo "✓ Electron cache is healthy"
+      else
+        echo "⚠️  Corrupted Electron cache detected"
+        echo "🧹 Removing: $ELECTRON_CACHE_ZIP"
+        rm -f "$ELECTRON_CACHE_ZIP"
+      fi
+      echo ""
+    fi
+  fi
+fi
+
+# Remove stale unpacked output from previous failed runs
+rm -rf dist/linux-unpacked
+
 # Generate icons if they don't exist
 if [ ! -f "assets/icon.png" ]; then
   echo "🎨 Generating app icons..."
